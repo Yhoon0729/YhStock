@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+
+{% block title %}주가 예측 - 트렌디 스톡{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <h1 class="mb-4 text-center">주가 예측 도구</h1>
+            <div class="card">
+                <div class="card-body">
+                    <form id="prediction-form">
+                        <div class="mb-3">
+                            <label for="stock-symbol" class="form-label">주식 종목 코드:</label>
+                            <input type="text" class="form-control" id="stock-symbol" placeholder="예: 005930 (삼성전자)" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="prediction-period" class="form-label">예측 기간:</label>
+                            <select class="form-select" id="prediction-period" required>
+                                <option value="1">1일</option>
+                                <option value="7">1주일</option>
+                                <option value="30">1개월</option>
+                                <option value="90">3개월</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="prediction-model" class="form-label">예측 모델:</label>
+                            <select class="form-select" id="prediction-model" required>
+                                <option value="linear">선형 회귀</option>
+                                <option value="arima">ARIMA</option>
+                                <option value="lstm">LSTM</option>
+                            </select>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <button type="submit" class="btn btn-primary w-50 me-2">주가 예측하기</button>
+                            <button type="button" class="btn btn-secondary w-50 ms-2" onclick="resetForm()">초기화</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div id="result" class="mt-4" style="display: none;">
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="card-title">예측 결과</h3>
+                        <div id="result-content"></div>
+                        <canvas id="prediction-chart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let chart = null;
+
+        document.getElementById('prediction-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            predictStock();
+        });
+
+        function predictStock() {
+            const symbol = document.getElementById('stock-symbol').value;
+            const period = document.getElementById('prediction-period').value;
+            const model = document.getElementById('prediction-model').value;
+
+            // 여기에 실제 API 호출 로직을 구현해야 합니다.
+            // 아래는 예시 데이터를 사용한 더미 응답입니다.
+            const dummyResponse = {
+                predictedPrice: 50000,
+                currentPrice: 48000,
+                dates: ['2024-07-28', '2024-07-29', '2024-07-30', '2024-07-31', '2024-08-01'],
+                prices: [48000, 48500, 49000, 49500, 50000]
+            };
+
+            displayResult(dummyResponse, symbol, period, model);
+        }
+
+        function displayResult(data, symbol, period, model) {
+            const resultDiv = document.getElementById('result');
+            const resultContent = document.getElementById('result-content');
+
+            resultContent.innerHTML = `
+                <p><strong>종목 코드:</strong> ${symbol}</p>
+                <p><strong>예측 기간:</strong> ${period}일</p>
+                <p><strong>사용된 모델:</strong> ${model}</p>
+                <p><strong>현재 주가:</strong> ${data.currentPrice.toLocaleString()}원</p>
+                <p><strong>예측 주가:</strong> ${data.predictedPrice.toLocaleString()}원</p>
+            `;
+
+            resultDiv.style.display = 'block';
+
+            // 기존 차트 제거
+            if (chart) {
+                chart.destroy();
+            }
+
+            // 새 차트 생성
+            const ctx = document.getElementById('prediction-chart').getContext('2d');
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.dates,
+                    datasets: [{
+                        label: '예측 주가',
+                        data: data.prices,
+                        borderColor: 'rgb(75, 192, 192)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: false
+                        }
+                    }
+                }
+            });
+        }
+
+        function resetForm() {
+            document.getElementById('prediction-form').reset();
+            document.getElementById('result').style.display = 'none';
+            if (chart) {
+                chart.destroy();
+                chart = null;
+            }
+        }
+    </script>
+{% endblock %}

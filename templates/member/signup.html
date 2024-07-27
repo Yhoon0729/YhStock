@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block title %}회원가입 - 트렌디 스톡{% endblock %}
+
+{% block content %}
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card mt-5">
+                <div class="card-header">
+                    <h2 class="text-center">회원가입</h2>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="id" class="form-label">아이디</label>
+                            <input type="text" class="form-control" id="id" name="id" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="pass1" class="form-label">비밀번호</label>
+                            <input type="password" class="form-control" id="pass1" name="pass1" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="name" class="form-label">이름</label>
+                            <input type="text" class="form-control" id="name" name="name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">성별</label>
+                            <div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="gender" id="male" value="1" checked>
+                                    <label class="form-check-label" for="male">남성</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="gender" id="female" value="0">
+                                    <label class="form-check-label" for="female">여성</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="tel" class="form-label">전화번호</label>
+                            <input type="tel" class="form-control" id="tel" name="tel" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">이메일</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">가입하기</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

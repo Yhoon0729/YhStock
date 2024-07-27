@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %}Stock Sage - 홈{% endblock %}
+
+{% block content %}
+    <h1 class="mb-4 text-center">실시간 주식 트렌드</h1>
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    주요 지수
+                </div>
+                <div class="card-body">
+                    <img src="data:image/png;base64,{{ kospi_graph }}" alt="Kospi Graph" style="width: 80%; height: auto;"/>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    핫 스톡
+                </div>
+                <div class="card-body">
+                    <ul>
+                        {% for name in top_10_names %}
+                            <li>{{ name }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    트렌드 뉴스
+                </div>
+                <div class="card-body">
+                    <!-- 여기에 최신 뉴스 목록을 표시 -->
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    마켓 무브먼트
+                </div>
+                <div class="card-body">
+                    <!-- 여기에 시장 동향 정보를 표시 -->
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
