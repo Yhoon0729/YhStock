@@ -1,5 +1,6 @@
 # myapp/views.py
 from django.conf import settings
+from django.http import JsonResponse
 from django.shortcuts import render
 import pandas as pd
 import os
@@ -10,6 +11,7 @@ from pykrx import stock
 from datetime import datetime, timedelta
 import io
 import urllib, base64
+import yfinance as yf
 
 def index(request):
     # 파일 경로 설정
@@ -125,3 +127,74 @@ def list(request):
 def predict(request) :
     if request.method != 'POST':
         return render(request, 'stock/predict.html')
+
+def info(request):
+    ticker = request.GET.get('ticker')
+    if ticker:
+        try:
+            # KOSPI 주식을 위해 ".KS" 추가
+            kospi_ticker = f"{ticker}.KS"
+            stock = yf.Ticker(kospi_ticker)
+            hist = stock.history(period="1mo")  # 1달 데이터
+
+            if hist.empty:
+                return render(request, 'stock/info.html', {'error': '데이터를 가져올 수 없습니다.'})
+
+            # 그래프 생성
+            plt.figure(figsize=(10,5))
+            plt.plot(hist.index, hist['Close'])
+            plt.title(f"{ticker} 주가")
+            plt.xlabel('날짜')
+            plt.ylabel('종가')
+            plt.xticks(rotation=45)
+            plt.tight_layout()
+
+            # 그래프를 이미지로 변환
+            buffer = io.BytesIO()
+            plt.savefig(buffer, format='png')
+            buffer.seek(0)
+            image_png = buffer.getvalue()
+            buffer.close()
+            graphic = base64.b64encode(image_png)
+            graphic = graphic.decode('utf-8')
+
+            plt.close()  # 메모리 누수 방지를 위해 plt 객체 닫기
+
+            # 주식 정보 가져오기
+            info = stock.info
+            company_name = info.get('longName', 'N/A')
+            current_price = info.get('currentPrice', 'N/A')
+            previous_close = info.get('previousClose', 'N/A')
+
+            return render(request, 'stock/info.html', {
+                'graphic': graphic,
+                'ticker': ticker,
+                'company_name': company_name,
+                'current_price': current_price,
+                'previous_close': previous_close
+            })
+
+        except Exception as e:
+            return render(request, 'stock/info.html', {'error': f'오류 발생: {str(e)}'})
+    else:
+        return render(request, 'stock/info.html')
+
+
+def search_stocks(request):
+    query = request.GET.get('query', '').strip()
+    if query:
+        try:
+            # KOSPI 주식 목록을 가져옵니다
+            all_stocks = fdr.StockListing('KOSPI')
+
+            # 주식 코드가 query로 시작하는 항목을 필터링합니다
+            results = all_stocks[all_stocks['Code'].str.startswith(query)]
+
+            # 결과를 리스트로 변환합니다 (최대 5개)
+            stocks = [{'code': row['Code'], 'name': row['Name']}
+                      for _, row in results.head(5).iterrows()]
+
+            return JsonResponse({'stocks': stocks})
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+    return JsonResponse({'stocks': []})

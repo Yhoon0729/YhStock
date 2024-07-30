@@ -1,56 +1,26 @@
 {% extends 'base.html' %}
 
-{% block title %}Stock Sage - 홈{% endblock %}
+{% block title %}Stock Sage - {{ ticker }} 정보{% endblock %}
 
 {% block content %}
+    <h1>{{ company_name }} ({{ ticker }}) 주가 정보</h1>
+
+    {% if error %}
+        <p>{{ error }}</p>
+    {% elif graphic %}
+        <p>현재 가격: {{ current_price }}</p>
+        <p>전일 종가: {{ previous_close }}</p>
+        <img src="data:image/png;base64,{{ graphic }}" alt="{{ ticker }} Graph">
+    {% else %}
+        <p>주식 코드를 입력해주세요.</p>
+    {% endif %}
+
     <form method="get" action="/stock/info/">
         <input type="text" id="stock-search" name="ticker" placeholder="주식 코드 입력 (예: 068270)" autocomplete="off">
         <button type="submit">검색</button>
         <div id="search-results" style="position: absolute; background: white; border: 1px solid #ccc; z-index: 1000; width: 200px;"></div>
     </form>
-    <h1 class="mb-4 text-center">실시간 주식 트렌드</h1>
-    <div class="row">
-        <div class="col-md-8">
-            <div class="card mb-4">
-                <div class="card-header">
-                    주요 지수
-                </div>
-                <div class="card-body">
-                    <img src="data:image/png;base64,{{ kospi_graph }}" alt="Kospi Graph" style="width: 80%; height: auto;"/>
-                </div>
-            </div>
-            <div class="card">
-                <div class="card-header">
-                    핫 스톡
-                </div>
-                <div class="card-body">
-                    <ul>
-                        {% for name in top_10_names %}
-                            <li>{{ name }}</li>
-                        {% endfor %}
-                    </ul>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card mb-4">
-                <div class="card-header">
-                    트렌드 뉴스
-                </div>
-                <div class="card-body">
-                    <!-- 여기에 최신 뉴스 목록을 표시 -->
-                </div>
-            </div>
-            <div class="card">
-                <div class="card-header">
-                    마켓 무브먼트
-                </div>
-                <div class="card-body">
-                    <!-- 여기에 시장 동향 정보를 표시 -->
-                </div>
-            </div>
-        </div>
-    </div>
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         $(document).ready(function() {
@@ -93,5 +63,4 @@
             });
         });
     </script>
-
 {% endblock %}
